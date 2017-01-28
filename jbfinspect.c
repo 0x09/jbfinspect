@@ -828,7 +828,7 @@ int main(int argc, char* argv[]) {
 					if(feof(f))
 						break;
 					fseek(f,-4,SEEK_CUR);
-					if(is_entry_boundary[1] != is_entry_boundary[2] != is_entry_boundary[3] != 0)
+					if(is_entry_boundary[1] + is_entry_boundary[2] + is_entry_boundary[3] != 0)
 						broken = true;
 				}
 				if(broken) {
