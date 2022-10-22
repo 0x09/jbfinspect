@@ -6,6 +6,10 @@ The author disclaims all copyright on this code.
 
 #define VERSION_STRING "2.0.0"
 
+#ifndef VERSION_META
+#define VERSION_META ""
+#endif
+
 /*
 JBF format description:
 Integers are little endian except where specified
