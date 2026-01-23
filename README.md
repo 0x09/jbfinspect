@@ -5,7 +5,7 @@ The format is described in the source file, and mirrored in the binary.
 Scripts exist like [this one](http://www.perlmonks.org/?node_id=225501) which can dump v2 files by scraping for JPEG headers, but as of 2011 I wasn't able to find any full reverse engineering of the format.  
 Code is a simple step-by-step parser which should be easy to reference for adding JBF support in file forensics programs or etc.
 
-Works on all major platforms with a C99 compiler. There is no makefile, simply `make jbfinspect`.
+Works on all major platforms with a C99 compiler.
 
 # Thumbnail formats
 V2 files (PSP 6+) simply contain embedded JFIF thumbs. Older formats use two different custom bitmap RLE schemes with a custom implicit palette. For these the tool will decode the RLCs and write a plain bitmap with the palette added.  
