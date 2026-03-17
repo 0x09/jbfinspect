@@ -3,7 +3,7 @@ TARGET=jbfinspect
 prefix ?= /usr/local
 bindir ?= $(prefix)/bin
 
-CFLAGS := -O3 -std=c99 -Wall -pedantic -D_GNU_SOURCE
+CFLAGS := -O3 -std=c99 -Wall -pedantic -D_GNU_SOURCE $(CFLAGS)
 
 .PHONY: all install uninstall clean
 
