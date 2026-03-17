@@ -420,6 +420,10 @@ static const union { uint16_t i; uint8_t e; } byteorder = {1};
 #define READLE(object,size,count,file) READ(object,size,count,file,LE)
 #define READBE(object,size,count,file) READ(object,size,count,file,BE)
 
+#define CHECKSEEK(file,offset,whence) do {\
+	if(fseeko(file,offset,whence))\
+		bail("%s+%lx: Seeking failure.\n",browsefile,ftell(file));\
+} while(0)
 
 #ifdef _WIN32
 #	define mkdir(path,mask) mkdir(path)
@@ -612,7 +616,7 @@ int main(int argc, char* argv[]) {
 	CHECKREAD(volume,1,32,f);
 	volume[31] = '\0';
 
-	fseek(f,713,SEEK_CUR); // End header
+	CHECKSEEK(f,713,SEEK_CUR); // End header
 
 
 	if(!quiet) {
@@ -753,7 +757,7 @@ int main(int argc, char* argv[]) {
 				}
 				fprintf(stderr,"Unable to open %s\n",writepath);
 			}
-			fseek(f,imglen,SEEK_CUR);
+			CHECKSEEK(f,imglen,SEEK_CUR);
 		}
 		else if(version[0] == 1) {
 			uint32_t imgindex;
@@ -761,10 +765,10 @@ int main(int argc, char* argv[]) {
 			if(imgindex != i)
 				bail("%s+%lx: imgindex (%d) != i (%"PRIu32").\n",browsefile,ftell(f)-4,imgindex,i);
 
-			fseek(f,20,SEEK_CUR);
+			CHECKSEEK(f,20,SEEK_CUR);
 			uint32_t bitmapsize;
 			READLE(&bitmapsize,4,1,f);
-			fseek(f,16,SEEK_CUR);
+			CHECKSEEK(f,16,SEEK_CUR);
 
 			FILE* thumb = NULL;
 			if(extract) {
@@ -775,7 +779,7 @@ int main(int argc, char* argv[]) {
 					fwrite((char[]){0x42,0x4D},2,1,thumb);
 					fwrite(&(uint32_t[]){1078+bitmapsize,0,1078},4,3,thumb);
 				}
-				fseek(f,-40,SEEK_CUR);
+				CHECKSEEK(f,-40,SEEK_CUR);
 				char buf[40];
 				CHECKREAD(buf,1,40,f);
 				fwrite(buf,1,40,thumb);
@@ -824,7 +828,7 @@ int main(int argc, char* argv[]) {
 								CHECKREAD(&color,1,1,f);
 								putc(color,thumb);
 							}
-						else fseek(f,token,SEEK_CUR);
+						else CHECKSEEK(f,token,SEEK_CUR);
 					}
 				}
 				/* Some v1.3 samples have been found to contain broken (wrong length) RLCs.
@@ -841,13 +845,13 @@ int main(int argc, char* argv[]) {
 							break;
 						bail("%s+%lx: Unexpected error.\n",browsefile,ftell(f));
 					}
-					fseek(f,-4,SEEK_CUR);
+					CHECKSEEK(f,-4,SEEK_CUR);
 					if(is_entry_boundary[1] + is_entry_boundary[2] + is_entry_boundary[3] != 0)
 						broken = true;
 				}
 				if(broken) {
 					fprintf(stderr,"%s+%lx: Broken v1 bitmap: got %"PRIu32", bitmapsize %"PRIu32"\n",browsefile,ftell(f),count,bitmapsize);
-					fseeko(f,oldpos,SEEK_SET);
+					CHECKSEEK(f,oldpos,SEEK_SET);
 					int zerorun = 0, c = 0;
 					while(c != EOF && zerorun < 3) {
 						if(!(c = fgetc(f)))
@@ -856,7 +860,7 @@ int main(int argc, char* argv[]) {
 					}
 					if(c == EOF)
 						break;
-					fseek(f,-4,SEEK_CUR);
+					CHECKSEEK(f,-4,SEEK_CUR);
 				}
 			}
 			if(thumb)
