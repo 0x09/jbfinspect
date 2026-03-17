@@ -626,7 +626,7 @@ int main(int argc, char* argv[]) {
 		puts("   type   resolution   bpp        size  modified              name");
 	}
 
-	size_t outdir_len;
+	size_t outdir_len = 0;
 	if(outdir)
 		outdir_len = strlen(outdir);
 	if(recreate) {
