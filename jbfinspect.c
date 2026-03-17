@@ -836,9 +836,11 @@ int main(int argc, char* argv[]) {
 				bool broken = count != bitmapsize;
 				if(!broken && !feof(f)) {
 					char is_entry_boundary[4];
-					fread(is_entry_boundary,1,4,f);
-					if(feof(f))
-						break;
+					if(fread(is_entry_boundary,1,4,f) != 4) {
+						if(feof(f))
+							break;
+						bail("%s+%lx: Unexpected error.\n",browsefile,ftell(f));
+					}
 					fseek(f,-4,SEEK_CUR);
 					if(is_entry_boundary[1] + is_entry_boundary[2] + is_entry_boundary[3] != 0)
 						broken = true;
