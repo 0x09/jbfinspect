@@ -844,7 +844,7 @@ int main(int argc, char* argv[]) {
 						broken = true;
 				}
 				if(broken) {
-					fprintf(stdout,"%s+%lx: Broken v1 bitmap: got %"PRIu32", bitmapsize %"PRIu32"\n",browsefile,ftell(f),count,bitmapsize);
+					fprintf(stderr,"%s+%lx: Broken v1 bitmap: got %"PRIu32", bitmapsize %"PRIu32"\n",browsefile,ftell(f),count,bitmapsize);
 					fseeko(f,oldpos,SEEK_SET);
 					int zerorun = 0, c = 0;
 					while(c != EOF && zerorun < 3) {
