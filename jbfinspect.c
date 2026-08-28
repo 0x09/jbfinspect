@@ -778,12 +778,12 @@ int main(int argc, char* argv[]) {
 				if(thumb) {
 					fwrite((char[]){0x42,0x4D},2,1,thumb);
 					fwrite(&(uint32_t[]){1078+bitmapsize,0,1078},4,3,thumb);
+					CHECKSEEK(f,-40,SEEK_CUR);
+					char buf[40];
+					CHECKREAD(buf,1,40,f);
+					fwrite(buf,1,40,thumb);
+					fwrite(&palette[0][0],1,1024,thumb);
 				}
-				CHECKSEEK(f,-40,SEEK_CUR);
-				char buf[40];
-				CHECKREAD(buf,1,40,f);
-				fwrite(buf,1,40,thumb);
-				fwrite(&palette[0][0],1,1024,thumb);
 			}
 
 			if(version[1] < 3) {
