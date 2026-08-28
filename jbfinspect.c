@@ -763,7 +763,7 @@ int main(int argc, char* argv[]) {
 			uint32_t imgindex;
 			READLE(&imgindex,4,1,f);
 			if(imgindex != i)
-				bail("%s+%lx: imgindex (%d) != i (%"PRIu32").\n",browsefile,ftell(f)-4,imgindex,i);
+				bail("%s+%lx: imgindex (%"PRIu32") != i (%"PRIu32").\n",browsefile,ftell(f)-4,imgindex,i);
 
 			CHECKSEEK(f,20,SEEK_CUR);
 			uint32_t bitmapsize;
