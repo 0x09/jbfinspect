@@ -784,6 +784,8 @@ int main(int argc, char* argv[]) {
 					fwrite(buf,1,40,thumb);
 					fwrite(&palette[0][0],1,1024,thumb);
 				}
+				else
+					fprintf(stderr,"Unable to open %s\n",writepath);
 			}
 
 			if(version[1] < 3) {
