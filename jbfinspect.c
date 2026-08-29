@@ -631,7 +631,10 @@ int main(int argc, char* argv[]) {
 		outdir_len = strlen(outdir);
 	if(recreate) {
 		outdir_len += strlen(path);
-		outdir = strcpy(malloc(outdir_len+1),outdir);
+		char* tmp = malloc(outdir_len+1);
+		if(!tmp)
+			bail("%s: Allocation failed\n",browsefile);
+		outdir = strcpy(tmp,outdir);
 		char* pp = path,* op = outdir + strlen(outdir);
 		*op++ = '/';
 		do switch(*pp) {
@@ -645,7 +648,13 @@ int main(int argc, char* argv[]) {
 	size_t browsedir_len;
 	if(orphaned_check) {
 		char* browsecpy = strdup(browsefile);
+		if(!browsecpy)
+			bail("%s: Allocation failed\n",browsefile);
+
 		browsedir = strdup(dirname(browsecpy));
+		if(!browsedir)
+			bail("%s: Allocation failed\n",browsefile);
+
 		browsedir_len = strlen(browsedir);
 		free(browsecpy);
 	}
@@ -719,11 +728,17 @@ int main(int argc, char* argv[]) {
 
 #if !defined(_WIN32) || (WINVER >= 0x0600) // place a symlink back to the source jbf
 			char* browsecpy = strdup(browsefile);
+			if(!browsecpy)
+				bail("%s: Allocation failed\n",browsefile);
+
 			char* browsebase = basename(browsecpy);
 			free(browsecpy);
 			char linkback[outdir_len+strlen(browsebase)+1];
 			strcat(strcpy(linkback,outdir),browsebase);
 			char* browseabs = realpath(browsefile,NULL);
+			if(!browseabs)
+				bail("%s: Allocation failed\n",browsefile);
+
 			symlink(browseabs,linkback);
 			free(browseabs);
 #endif
