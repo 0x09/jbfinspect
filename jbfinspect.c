@@ -786,18 +786,22 @@ int main(int argc, char* argv[]) {
 			CHECKSEEK(f,16,SEEK_CUR);
 
 			FILE* thumb = NULL;
+			bool write_failed = false;
+			char writepath[outdir_len+name_len+6];
 			if(extract) {
-				char writepath[outdir_len+name_len+6];
 				sprintf(writepath,"%s/%s.bmp",outdir,name);
 				thumb = fopen(writepath,"wb");
 				if(thumb) {
-					fwrite((char[]){0x42,0x4D},2,1,thumb);
-					fwrite(&(uint32_t[]){1078+bitmapsize,0,1078},4,3,thumb);
+					write_failed = fwrite((char[]){0x42,0x4D},2,1,thumb) != 1;
+					if(!write_failed)
+						write_failed = fwrite(&(uint32_t[]){1078+bitmapsize,0,1078},4,3,thumb) != 3;
 					CHECKSEEK(f,-40,SEEK_CUR);
 					char buf[40];
 					CHECKREAD(buf,1,40,f);
-					fwrite(buf,1,40,thumb);
-					fwrite(&palette[0][0],1,1024,thumb);
+					if(!write_failed)
+						write_failed = fwrite(buf,1,40,thumb) != 40;
+					if(!write_failed)
+						write_failed = fwrite(&palette[0][0],1,1024,thumb) != 1024;
 				}
 				else
 					fprintf(stderr,"Unable to open %s\n",writepath);
@@ -812,14 +816,14 @@ int main(int argc, char* argv[]) {
 						count += token & 0x3Fu;
 						CHECKREAD(&color,1,1,f);
 						if(thumb) {
-							for(uint8_t run = 0; run < (token&0x3Fu); run++)
-								putc(color,thumb);
+							for(uint8_t run = 0; run < (token&0x3Fu) && !write_failed; run++)
+								write_failed = putc(color,thumb) == EOF;
 						}
 					}
 					else {
 						count++;
-						if(thumb)
-							putc(token,thumb);
+						if(thumb && !write_failed)
+							write_failed = putc(token,thumb) == EOF;
 					}
 				}
 				if(count != bitmapsize)
@@ -835,15 +839,15 @@ int main(int argc, char* argv[]) {
 						count += token & 0x7Fu;
 						CHECKREAD(&color,1,1,f);
 						if(thumb)
-							for(uint8_t run = 0; run < (token&0x7Fu); run++)
-								putc(color,thumb);
+							for(uint8_t run = 0; run < (token&0x7Fu) && !write_failed; run++)
+								write_failed = putc(color,thumb) == EOF;
 					}
 					else {
 						count += token;
 						if(thumb)
-							for(uint8_t run = 0; run < token; run++) {
+							for(uint8_t run = 0; run < token && !write_failed; run++) {
 								CHECKREAD(&color,1,1,f);
-								putc(color,thumb);
+								write_failed = putc(color,thumb) == EOF;
 							}
 						else CHECKSEEK(f,token,SEEK_CUR);
 					}
@@ -880,6 +884,8 @@ int main(int argc, char* argv[]) {
 					CHECKSEEK(f,-4,SEEK_CUR);
 				}
 			}
+			if(write_failed)
+				fprintf(stderr,"Error writing to %s\n",writepath);
 			if(thumb)
 				fclose(thumb);
 		}
