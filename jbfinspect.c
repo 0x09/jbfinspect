@@ -4,7 +4,7 @@ Format is documented below, and again in the binary.
 The author disclaims all copyright on this code.
 */
 
-#define VERSION_STRING "2.0.3"
+#define VERSION_STRING "2.0.4"
 
 #ifndef VERSION_META
 #define VERSION_META ""
