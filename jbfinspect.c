@@ -570,6 +570,7 @@ void usage(char* self, bool h) {
 }
 
 int main(int argc, char* argv[]) {
+	int ret = 0;
 	int opt;
 	char* outdir = NULL;
 	bool orphaned_check = false, recreate = false, quiet = false;
@@ -763,14 +764,17 @@ int main(int argc, char* argv[]) {
 					if(!buf)
 						bail("%s+%lx: Allocation failed for image #%"PRIu32", length %"PRIu32"\n",browsefile,ftell(f)-4,i,imglen);
 					imglen = fread(buf,1,imglen,f); // If the file is truncated for any reason we will write a partial JPEG and fail the next time around
-					if(fwrite(buf,1,imglen,thumb) != imglen)
+					if(fwrite(buf,1,imglen,thumb) != imglen) {
 						fprintf(stderr,"Error writing to %s\n",writepath);
+						ret = 1;
+					}
 					fclose(thumb);
 					free(buf);
 					utime(writepath,&(struct utimbuf){epochtime,epochtime});
 					continue;
 				}
 				fprintf(stderr,"Unable to open %s\n",writepath);
+				ret = 1;
 			}
 			CHECKSEEK(f,imglen,SEEK_CUR);
 		}
@@ -803,8 +807,10 @@ int main(int argc, char* argv[]) {
 					if(!write_failed)
 						write_failed = fwrite(&palette[0][0],1,1024,thumb) != 1024;
 				}
-				else
+				else {
 					fprintf(stderr,"Unable to open %s\n",writepath);
+					ret = 1;
+				}
 			}
 
 			if(version[1] < 3) {
@@ -884,8 +890,10 @@ int main(int argc, char* argv[]) {
 					CHECKSEEK(f,-4,SEEK_CUR);
 				}
 			}
-			if(write_failed)
+			if(write_failed) {
 				fprintf(stderr,"Error writing to %s\n",writepath);
+				ret = 1;
+			}
 			if(thumb)
 				fclose(thumb);
 		}
@@ -895,5 +903,5 @@ int main(int argc, char* argv[]) {
 	if(fgetc(f) != EOF)
 		bail("%s+%lx: More data in file than expected.\n",browsefile,ftell(f)-1);
 
-	return 0;
+	return ret;
 }
