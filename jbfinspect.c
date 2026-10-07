@@ -555,17 +555,22 @@ const char* type_lookup(uint32_t code) {
 	return unknown;
 }
 
-void usage(char* self, bool h) {
-	    printf("Usage: %s [-orqDhv] [-d path] pspbrwse.jbf\n",self);
-	if(h) puts("List or extract the contents of Jasc thumbnail caches.\n\n"
-	           "   -d   Extract thumbnails to given directory.\n"
-	           "   -o   Highlight orphaned files. With -d, only extract these.\n"
-	           "   -r   When extracting files, recreate path found in jbf under pwd or directory given by -d.\n"
-	           "        Useful for batch processing with e.g. find.\n"
-	           "   -q   Don't list contents.\n"
-	           "   -D   Print format documentation.\n"
-	           "   -h   Show this help.\n"
-	           "   -v   Show version information.\n");
+void usage(const char* self) {
+	fprintf(stderr,"Usage: %s [-orqDhv] [-d path] pspbrwse.jbf\n",self);
+	exit(1);
+}
+
+void help(const char* self) {
+	printf("Usage: %s [-orqDhv] [-d path] pspbrwse.jbf\n",self);
+	puts("List or extract the contents of Jasc thumbnail caches.\n\n"
+	     "   -d   Extract thumbnails to given directory.\n"
+	     "   -o   Highlight orphaned files. With -d, only extract these.\n"
+	     "   -r   When extracting files, recreate path found in jbf under pwd or directory given by -d.\n"
+	     "        Useful for batch processing with e.g. find.\n"
+		 "   -q   Don't list contents.\n"
+	     "   -D   Print format documentation.\n"
+	     "   -h   Show this help.\n"
+	     "   -v   Show version information.\n");
 	exit(0);
 }
 
@@ -581,14 +586,14 @@ int main(int argc, char* argv[]) {
 			case 'd': outdir = optarg; break;
 			case 'q': quiet = true; break;
 			case 'D': puts(doc); return 0;
-			case 'h': usage(argv[0],1);
+			case 'h': help(argv[0]);
 			case 'v':
 				puts("version " VERSION_STRING VERSION_META);
 				exit(0);
-			default : usage(argv[0],0);
+			default : usage(argv[0]);
 		}
 	if(argc - optind != 1)
-		usage(argv[0],0);
+		usage(argv[0]);
 	if(recreate && !outdir)
 		outdir = ".";
 
