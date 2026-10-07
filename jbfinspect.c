@@ -894,8 +894,10 @@ int main(int argc, char* argv[]) {
 				fprintf(stderr,"Error writing to %s\n",writepath);
 				ret = 1;
 			}
-			if(thumb)
+			if(thumb) {
 				fclose(thumb);
+				utime(writepath,&(struct utimbuf){epochtime,epochtime});
+			}
 		}
 		else bail("%s: unknown version (%"PRIu16".%"PRIu16")\n",browsefile,version[0],version[1]);
 	}
