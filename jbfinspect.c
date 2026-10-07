@@ -556,17 +556,18 @@ const char* type_lookup(uint32_t code) {
 }
 
 void usage(const char* self) {
-	fprintf(stderr,"Usage: %s [-orqDhv] [-d path] pspbrwse.jbf\n",self);
+	fprintf(stderr,"Usage: %s [-ortqDhv] [-d path] pspbrwse.jbf\n",self);
 	exit(1);
 }
 
 void help(const char* self) {
-	printf("Usage: %s [-orqDhv] [-d path] pspbrwse.jbf\n",self);
+	printf("Usage: %s [-ortqDhv] [-d path] pspbrwse.jbf\n",self);
 	puts("List or extract the contents of Jasc thumbnail caches.\n\n"
 	     "   -d   Extract thumbnails to given directory.\n"
 	     "   -o   Highlight orphaned files. With -d, only extract these.\n"
 	     "   -r   When extracting files, recreate path found in jbf under pwd or directory given by -d.\n"
 	     "        Useful for batch processing with e.g. find.\n"
+		 "   -t   Set the modification time of extracted thumbnails to their timestamp in the jbf.\n"
 		 "   -q   Don't list contents.\n"
 	     "   -D   Print format documentation.\n"
 	     "   -h   Show this help.\n"
@@ -578,11 +579,12 @@ int main(int argc, char* argv[]) {
 	int ret = 0;
 	int opt;
 	char* outdir = NULL;
-	bool orphaned_check = false, recreate = false, quiet = false;
-	while((opt = getopt(argc,argv,"roqd:hDv")) != -1)
+	bool orphaned_check = false, recreate = false, quiet = false, set_timestamps = false;
+	while((opt = getopt(argc,argv,"rotqd:hDv")) != -1)
 		switch(opt) {
 			case 'o': orphaned_check = true; break;
 			case 'r': recreate = true; break;
+			case 't': set_timestamps = true; break;
 			case 'd': outdir = optarg; break;
 			case 'q': quiet = true; break;
 			case 'D': puts(doc); return 0;
@@ -775,7 +777,8 @@ int main(int argc, char* argv[]) {
 					}
 					fclose(thumb);
 					free(buf);
-					utime(writepath,&(struct utimbuf){epochtime,epochtime});
+					if(set_timestamps)
+						utime(writepath,&(struct utimbuf){epochtime,epochtime});
 					continue;
 				}
 				fprintf(stderr,"Unable to open %s\n",writepath);
@@ -901,7 +904,8 @@ int main(int argc, char* argv[]) {
 			}
 			if(thumb) {
 				fclose(thumb);
-				utime(writepath,&(struct utimbuf){epochtime,epochtime});
+				if(set_timestamps)
+					utime(writepath,&(struct utimbuf){epochtime,epochtime});
 			}
 		}
 		else bail("%s: unknown version (%"PRIu16".%"PRIu16")\n",browsefile,version[0],version[1]);
